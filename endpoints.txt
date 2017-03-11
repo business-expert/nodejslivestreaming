@@ -1,0 +1,254 @@
+/
+	performance
+	
+		loadavg
+			GET http://xxx.xxx.xxx.xxx:8080/performance/loadavg
+			on success:
+				{"status":true, "msg":"", "loadavg":[x.xxx,x.xxx,x.xxx]}
+				where loadavg is an array containing the load avg for the past 1, 5, 15 minutes
+			on error:
+				{"status":false, "msg":"[Error Message]"}				
+				
+		memusage
+			GET http://xxx.xxx.xxx.xxx:8080/performance/memusage
+			on success:		
+				{"status":true, "msg":"", "memory":{"total":3914022912,"free":2710056960}}
+			on error:
+				{"status":false, "msg":"[Error Message]"}
+			
+		cpus
+			GET http://xxx.xxx.xxx.xxx:8080/performance/cpus
+			on success:
+				returns an array of objects each representing the status of a cpu
+				{"status":true,"msg":"",
+					"cpus":[
+						{"model":"Intel(R) Celeron(R) CPU 1007U @ 1.50GHz","speed":800,"times":{"user":198900,"nice":6300,"sys":230200,"idle":51589500,"irq":0}},
+						{"model":"Intel(R) Celeron(R) CPU 1007U @ 1.50GHz","speed":800,"times":{"user":126100,"nice":4000,"sys":156700,"idle":52062000,"irq":0}}
+					]
+				}
+			on error:
+				{"status":false, "msg":"[Error Message]"}
+		
+		diskusage
+			GET http://xxx.xxx.xxx.xxx:8080/performance/diskusage
+			on success:	
+				returns the diskusage for the data partition of the unit
+				{"status":true, "msg":"", "diskusage":{"total":"424575368","used":"3606460","available":"399395072","usage":"1%","units":"KB"}}
+			on error:
+				{"status":false, "msg":"[Error Message]"}
+		
+	clips
+		GET http://xxx.xxx.xxx.xxx:8080/clips
+			on success:
+			returns an array of all clips that have been uploaded onto the unit to be used as preroles, postroles, etc
+			{"status":true,"msg":"4 Clips found","clips":[
+					{"uid":3,"uri":"638e89a95e5710cb9663707e58e3e409d380c59cb07d2b4720cc7bbdd4b17dff.mp4","title":"clip1.mp4"},
+					{"uid":4,"uri":"53e336caeaec6ee0553b4a7f0c0813ca99cc603631a97bd06c5a140c558ca554.mp4","title":"clip2.mp4"},
+					{"uid":5,"uri":"1cef04cd31bcf6e58c3b0e066d7eb3ea83e5458555473e620aae5af3e23749f6.webm","title":"clip3.webm"},
+					{"uid":6,"uri":"ed34c53045038ae7f03f741e10298fc6c54f93aec01a74449ee2d65712226f30.mp4","title":"clip4.mp4"}
+				]
+			}		
+			on error:
+				{"status":false, "msg":"[Error Message]"}
+									
+		PUT http://xxx.xxx.xxx.xxx:8080/clips
+		headers: x_filename=[the orignal filename]
+			upload a media file (mpg, mp4, mov, webm, etc) to the unit via xmlHttpRequest
+			the storage filename is a hash generated from the originalfilename with the original extension
+			for example clip1.mp4 is stored as 638e89a95e5710cb9663707e58e3e409d380c59cb07d2b4720cc7bbdd4b17dff.mp4
+			
+			on success:
+				{"status":true, "msg":"Upload Complete"}
+
+			on error:
+				{"status":false, "msg":"[Error Message]"}
+		
+		DELETE http://xxx.xxx.xxx.xxx:8080/clips?clipID=[Clip record uid]
+		the clip record uid returned by GET http://xxx.xxx.xxx.xxx:8080/clips
+			on success:
+				{"status":true, "msg":"Clip has been deleted"}
+
+			on error:
+				{"status":false, "msg":"[Error Message]"}
+				
+	sources
+		GET http://xxx.xxx.xxx.xxx:8080/sources
+		
+			on success:
+				returns object containing account status overview and array of all available live sources
+				{
+					"status":true,
+					"rmss":{
+						"error":null,"account_status":"activated","status_text":"Client account is active",
+						"sources":[
+							{"title":"test yourchurch hls","source":"http://159.203.40.28/i/multisite_1@0817/master.m3u8","serviceRegion":"JFK","ulssRegion":"","streamID":0},
+							{"title":"AKAMAI HLS","source":"http://sfjdemo-i.akamaihd.net/hls/live/250481/test/test.m3u8","serviceRegion":"JFK","ulssRegion":"","streamID":0},
+							{"title":"testerss","source":"http://finaltest_463320-lh.akamaihd.net/i/testfinal_1@392777/master.m3u8","serviceRegion":"JFK","ulssRegion":"JFK","streamID":25},
+							{"title":"test akamai url struc","source":"http://107.170.199.137:8080/i/test_1@54585/master.m3u8","serviceRegion":"JFK","ulssRegion":"","streamID":0}
+						]
+					}
+				}
+
+			on error:
+				{"status":false, "msg":"Error Message"}
+		
+		POST http://xxx.xxx.xxx.xxx:8080/sources
+		Data: source=source=http://pageantvision-lh.akamaihd.net/i/pageantVision149_1@181769/master.m3u8
+		
+			on success:
+				returns object representation of the renditions within the hls playlist specified by source
+				{
+					"status":true,
+					"msg":"Valid M3U8 Playlist",
+					"playList":{
+						"isMaster":true,
+						"streams":[
+							{"CODECS":"avc1.77.30, mp4a.40.2","RESOLUTION":"640x360","BANDWIDTH":"2548000","PROGRAM-ID":"1","RENDITION-URI":"http://pageantvision-lh.akamaihd.net/i/pageantVision149_1@181769/index_800_av-p.m3u8?sd=10&rebase=on"},
+							{"CODECS":"mp4a.40.2","BANDWIDTH":"48000","PROGRAM-ID":"1","RENDITION-URI":"http://pageantvision-lh.akamaihd.net/i/pageantVision149_1@181769/index_800_a-p.m3u8?sd=10&rebase=on"}
+						]
+					}
+				}
+
+			on error:
+				{"status":false, "msg":"Error Message"}		
+	presets
+		GET http://xxx.xxx.xxx.xxx:8080/presets
+		
+			on success:
+				returns array of object representations of existing presets
+				{
+					"status":true,
+					"msg":"1 presets found",
+					"presets":[
+						{"uid":4,"preset_name":"Pageant at 640","master_uri":"http://pageantvision-lh.akamaihd.net/i/pageantVision149_1@181769/master.m3u8","ulss_region":"","rmss_region":"JFK","rendition_uri":"http://pageantvision-lh.akamaihd.net/i/pageantVision149_1@181769/index_800_av-p.m3u8?sd=10&rebase=on","renditionID":0,"bandwidth":2548,"width":640,"height":360,"last_used":null,"created_at":1478041546,"deleted_at":0}
+					]
+				}
+				
+			on error:
+				{"status":false, "msg":"Error Message"}
+	
+		POST http://xxx.xxx.xxx.xxx:8080/presets
+		Data: preset_name=Pageant Test&master_uri=http://pageantvision-lh.akamaihd.net/i/pageantVision149_1@181769/master.m3u8&renditionID=0
+
+			on success:
+				returns short description obj of the preset
+				{
+					"status":true,
+					"msg":"Preset has been created",
+					"preset":{"uid":5,"created_at":1482373764}
+				}				
+			on error:
+				{"status":false, "msg":"Error Message"}
+
+		DELETE http://xxx.xxx.xxx.xxx:8080/presets/[presetID]
+		
+			on success:
+				{"status":true,"msg":"Preset has been deleted"}			
+			on error:
+				{"status":false, "msg":"Error Message"}
+				
+	sessions
+		GET http://xxx.xxx.xxx.xxx:8080/sessions
+		
+			on success:
+				returns object representation of last active session
+				{
+					"status":true,
+					"msg":"Active session found",
+					"session":{
+						"uid":5,"preset_id":4,"session_name":"2016_11_02_22_43_08","master_uri":"http://pageantvision-lh.akamaihd.net/i/pageantVision149_1@181769/master.m3u8","ulss_region":"","rmss_region":"JFK","rendition_uri":"http://pageantvision-lh.akamaihd.net/i/pageantVision149_1@181769/index_800_av-p.m3u8","renditionID":0,"bandwidth":2548,"width":640,"height":360,"status":"loading","last_action":1478213722,"created_at":1478126588,"deleted_at":0
+					}
+				}
+			on error:
+				{"status":false, "msg":"Error Message"}
+		
+		new
+			POST http://xxx.xxx.xxx.xxx:8080/sessions/new
+			Data: presetID=[INT]
+
+				on success:
+					{"status":true,"msg":"Preset has been created","session":{"preset_id":7,"session_name":"2016_12_22_03_30_30","master_uri":"http://pageantvision-lh.akamaihd.net/i/pageantVision149_1@181769/master.m3u8","rendition_uri":"http://pageantvision-lh.akamaihd.net/i/pageantVision149_1@181769/index_800_av-p.m3u8?sd=10&rebase=on","width":null,"height":null,"bandwidth":null,"ulss_region":"","rmss_region":null,"created_at":1482377418,"last_action":1482377418,"deleted_at":0,"status":"new","uid":6}}
+				on error:
+					{"status":false, "msg":"Error Message"}
+		start
+			POST
+		resume
+			POST
+		pause
+			POST
+		terminate
+			POST
+		status		
+			GET
+		delete
+			DELETE	
+	pbqueue
+		[sessionID]
+			GET http://xxx.xxx.xxx.xxx:8080/pbqueue/[sessionID]
+				on success:
+					{"status":true,"msg":"1 entries queued for playback","queue":[{"uid":1,"sessionID":5,"orderID":7,"isEventFeed":1,"mediaSource":"/buffer/2016_11_02_22_43_08/index.m3u8","startPos":1935.347,"duration":0,"startedAt":0,"endedAt":0,"status":"playing"}]}
+				on error:
+					{"status":false, "msg":"Failed to queue clip"}
+				
+			PUT http://xxx.xxx.xxx.xxx:8080/pbqueue/[sessionID]
+			Data: clipID=[INT]
+				adds the clip defined by clipID to the playback queue belonging to sessionID
+				
+				on success:
+					{"status":true, "msg":"Clip inserted into playback queue"}
+
+				on error:
+					{"status":false, "msg":"Failed to queue clip"}
+			
+			[queueEntryID]
+				POST http://xxx.xxx.xxx.xxx:8080/pbqueue/[sessionID]/[queueEntryID]
+				Data: startPos=[float]&duration=[float] (drop one of the fields and it will be ignored, specified field is updated)
+				
+				DELETE http://xxx.xxx.xxx.xxx:8080/pbqueue/[sessionID]/[queueEntryID]
+					deletes entry [queueEntryID] from playback queue belonging to sessionID
+					
+					on success:
+						{"status":true, "msg":"Entry has been removed from playback queue"}
+
+					on error:
+						{"status":false, "msg":"Failed to remove entry from playback queue"}
+				
+				up
+					POST http://xxx.xxx.xxx.xxx:8080/pbqueue/[sessionID]/[queueEntryID]/up
+					shifts entry up by one position in the queue
+					
+					on success:
+						{"status":true, "msg":"Entry has been moved up"}
+
+					on error:
+						{"status":false, "msg":"[Error Message]"}
+					
+				down
+					POST http://xxx.xxx.xxx.xxx:8080/pbqueue/[sessionID]/[queueEntryID]/down
+					shifts entry down by one position in the queue
+
+					on success:
+						{"status":true, "msg":"Entry has been moved down"}
+
+					on error:
+						{"status":false, "msg":"[Error Message]"}
+					
+			
+	playback
+		[sessionID]
+			commit		
+			play
+			pause
+			terminate			
+			mute
+			unmute
+			vinc
+			vdec
+			status
+			play
+			pause
+			terminate
+	buffer
+		GET
+	static
+		GET
